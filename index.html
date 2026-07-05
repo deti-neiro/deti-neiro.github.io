@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>НейроКлуб — школа ИИ для детей и подростков</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0D0D0D;
+    --white: #FAFAF7;
+    --accent: #E8621A;
+    --accent2: #C94F0E;
+    --purple: #6B2FFA;
+    --purple-light: #EDE6FF;
+    --gray: #F2F1EC;
+    --gray2: #E0DED7;
+    --text-muted: #7A7870;
+    --font-head: 'Unbounded', sans-serif;
+    --font-body: 'Onest', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--white); color: var(--black); overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: rgba(250,250,247,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray2);
+    gap: 0.5rem;
+  }
+  .nav-logo { font-family: var(--font-head); font-weight: 900; font-size: 0.75rem; color: var(--black); text-decoration: none; line-height: 1.2; flex-shrink: 0; }
+  .nav-cta { background: var(--black); color: var(--accent); font-family: var(--font-head); font-weight: 700; font-size: 0.6rem; padding: 0.5rem 0.9rem; border-radius: 50px; text-decoration: none; letter-spacing: 0.02em; transition: transform 0.2s, background 0.2s; text-align: center; line-height: 1.3; flex-shrink: 0; }
+  .nav-cta:hover { background: var(--purple); transform: scale(1.04); }
+
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 6rem 2rem 4rem; position: relative; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; z-index: 0; background: var(--white); }
+  .hero-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55; }
+  .hero-blob-1 { width: 600px; height: 600px; background: var(--accent); top: -100px; right: -100px; animation: float1 8s ease-in-out infinite; }
+  .hero-blob-2 { width: 400px; height: 400px; background: #C4B5FD; bottom: -50px; left: -80px; animation: float2 10s ease-in-out infinite; }
+  @keyframes float1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-30px,30px) scale(1.05)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-20px) scale(1.08)} }
+
+  .hero-inner { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; width: 100%; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--black); color: var(--accent); font-family: var(--font-head); font-size: 0.65rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 50px; letter-spacing: 0.06em; margin-bottom: 2rem; animation: fadeUp 0.6s ease both; }
+  .hero-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+  .hero-title { font-family: var(--font-head); font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 1.5rem; animation: fadeUp 0.6s 0.1s ease both; }
+  .hero-title em { font-style: normal; color: var(--purple); }
+  .hero-title .acc { background: var(--accent); color: var(--white); padding: 0 12px; border-radius: 12px; display: inline-block; }
+  .hero-sub { font-size: 1.15rem; color: var(--text-muted); max-width: 560px; line-height: 1.65; margin-bottom: 2.5rem; animation: fadeUp 0.6s 0.2s ease both; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; animation: fadeUp 0.6s 0.3s ease both; margin-bottom: 3rem; }
+
+  .btn-primary { background: var(--black); color: var(--accent); font-family: var(--font-head); font-weight: 700; font-size: 0.75rem; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; letter-spacing: 0.03em; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 4px 4px 0 var(--accent2); }
+  .btn-primary:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--accent2); }
+  .btn-secondary { background: transparent; color: var(--black); font-family: var(--font-head); font-weight: 700; font-size: 0.75rem; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; letter-spacing: 0.03em; border: 2px solid var(--black); transition: background 0.2s, color 0.2s; }
+  .btn-secondary:hover { background: var(--black); color: var(--accent); }
+
+  .hero-trust { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; animation: fadeUp 0.6s 0.4s ease both; }
+  .hero-stat { display: flex; flex-direction: column; }
+  .hero-stat strong { font-family: var(--font-head); font-weight: 900; font-size: 1.6rem; color: var(--black); }
+  .hero-stat span { font-size: 0.8rem; color: var(--text-muted); }
+  .hero-divider { width: 1px; height: 40px; background: var(--gray2); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  .first-lesson { background: var(--black); color: var(--white); padding: 5rem 2rem; }
+  .first-lesson-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+  .section-label { font-family: var(--font-head); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 1.2rem; text-transform: uppercase; }
+  .first-lesson h2 { font-family: var(--font-head); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.1; margin-bottom: 1.2rem; }
+  .first-lesson h2 em { font-style: normal; color: var(--accent); }
+  .first-lesson p { color: #9CA3AF; line-height: 1.7; margin-bottom: 1.5rem; }
+  .lesson-result { background: #1A1A1A; border-radius: 20px; padding: 2rem; border: 1px solid #2A2A2A; }
+  .lesson-result-label { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; font-family: var(--font-head); }
+  .lesson-steps { display: flex; flex-direction: column; gap: 1rem; }
+  .lesson-step { display: flex; align-items: flex-start; gap: 1rem; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--white); font-family: var(--font-head); font-weight: 900; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-text { font-size: 0.9rem; color: #D1D5DB; line-height: 1.5; padding-top: 4px; }
+  .step-result { margin-top: 0.4rem; font-size: 0.8rem; color: var(--accent); font-weight: 600; }
+
+  .skills { padding: 5rem 2rem; background: var(--gray); }
+  .skills-inner { max-width: 900px; margin: 0 auto; }
+  .skills h2 { font-family: var(--font-head); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.1; margin-bottom: 3rem; max-width: 600px; }
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .skill-card { background: var(--white); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--gray2); transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+  .skill-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); }
+  .skill-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .skill-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+  .skill-card h3 { font-family: var(--font-head); font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem; line-height: 1.3; }
+  .skill-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+  .skill-wow { margin-top: 0.8rem; font-size: 0.75rem; font-weight: 600; color: var(--purple); background: var(--purple-light); padding: 3px 10px; border-radius: 20px; display: inline-block; }
+
+  .pricing { padding: 5rem 2rem; background: var(--white); }
+  .pricing-inner { max-width: 900px; margin: 0 auto; }
+  .pricing h2 { font-family: var(--font-head); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 3rem; line-height: 1.1; }
+  .pricing-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .pricing-card { border-radius: 20px; padding: 2rem; border: 2px solid var(--gray2); }
+  .pricing-card.featured { background: var(--black); color: var(--white); border-color: var(--black); position: relative; overflow: hidden; }
+  .pricing-card.featured::after { content: 'ВЫГОДНЕЕ'; position: absolute; top: 20px; right: -28px; background: var(--accent); color: var(--white); font-family: var(--font-head); font-size: 0.55rem; font-weight: 900; padding: 4px 36px; transform: rotate(45deg); letter-spacing: 0.08em; }
+  .pricing-label { font-family: var(--font-head); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+  .pricing-card.featured .pricing-label { color: var(--accent); }
+  .pricing-price { font-family: var(--font-head); font-weight: 900; font-size: 3rem; line-height: 1; margin-bottom: 0.3rem; }
+  .pricing-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+  .pricing-card.featured .pricing-price span { color: #9CA3AF; }
+  .pricing-per { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .pricing-card.featured .pricing-per { color: #9CA3AF; }
+  .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 2rem; }
+  .pricing-features li { font-size: 0.88rem; display: flex; align-items: flex-start; gap: 0.6rem; line-height: 1.4; }
+  .pricing-features li::before { content: '✓'; font-weight: 700; color: var(--accent2); flex-shrink: 0; margin-top: 1px; }
+  .pricing-card.featured .pricing-features li::before { color: var(--accent); }
+  .btn-accent { display: block; text-align: center; background: var(--accent); color: var(--white); font-family: var(--font-head); font-weight: 900; font-size: 0.7rem; padding: 1rem; border-radius: 50px; text-decoration: none; letter-spacing: 0.04em; transition: transform 0.2s; }
+  .btn-accent:hover { transform: scale(1.03); background: var(--accent2); }
+  .btn-outline-white { display: block; text-align: center; background: transparent; color: var(--black); font-family: var(--font-head); font-weight: 700; font-size: 0.7rem; padding: 1rem; border-radius: 50px; text-decoration: none; letter-spacing: 0.04em; border: 2px solid var(--gray2); transition: border-color 0.2s; }
+  .btn-outline-white:hover { border-color: var(--black); }
+
+  .how { padding: 5rem 2rem; background: var(--gray); }
+  .how-inner { max-width: 900px; margin: 0 auto; }
+  .how h2 { font-family: var(--font-head); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 3rem; line-height: 1.1; }
+  .how-steps { display: flex; flex-direction: column; gap: 0; }
+  .how-step { display: grid; grid-template-columns: 80px 1fr; gap: 1.5rem; padding: 1.5rem 0; border-bottom: 1px solid var(--gray2); align-items: start; }
+  .how-step:last-child { border-bottom: none; }
+  .how-num { font-family: var(--font-head); font-weight: 900; font-size: 3rem; color: var(--gray2); line-height: 1; }
+  .how-content h3 { font-family: var(--font-head); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.4rem; }
+  .how-content p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+
+  .signup { padding: 5rem 2rem; background: var(--black); }
+  .signup-inner { max-width: 700px; margin: 0 auto; text-align: center; }
+  .signup h2 { font-family: var(--font-head); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--white); margin-bottom: 0.8rem; line-height: 1.1; }
+  .signup h2 em { font-style: normal; color: var(--accent); }
+  .signup-sub { color: #9CA3AF; margin-bottom: 2.5rem; line-height: 1.6; }
+  .ya-form-wrap { background: var(--white); border-radius: 20px; padding: 2rem; border: 1px solid #2A2A2A; overflow: hidden; }
+  .ya-form-wrap iframe { width: 100% !important; min-height: 420px; border: none; display: block; }
+
+  .faq { padding: 5rem 2rem; background: var(--white); }
+  .faq-inner { max-width: 700px; margin: 0 auto; }
+  .faq h2 { font-family: var(--font-head); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 2.5rem; line-height: 1.1; }
+  .faq-item { border-bottom: 1px solid var(--gray2); overflow: hidden; }
+  .faq-q { width: 100%; background: none; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 0; text-align: left; gap: 1rem; }
+  .faq-q span { font-family: var(--font-head); font-weight: 700; font-size: 0.85rem; color: var(--black); line-height: 1.4; }
+  .faq-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--gray); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem; color: var(--black); transition: transform 0.3s, background 0.2s; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); background: var(--accent); }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.3s; }
+  .faq-a p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; padding-bottom: 1.2rem; }
+  .faq-item.open .faq-a { max-height: 200px; }
+
+  footer { background: var(--black); color: #555; padding: 2.5rem 2rem; font-size: 0.8rem; }
+  .footer-inner { max-width: 900px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-between; align-items: center; }
+  .footer-logo { font-family: var(--font-head); font-weight: 900; color: var(--white); font-size: 0.9rem; }
+  .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .footer-links a { color: #555; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy { width: 100%; color: #3A3A3A; font-size: 0.72rem; }
+
+  @media (max-width: 700px) {
+    .first-lesson-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+    .pricing-cards { grid-template-columns: 1fr; }
+    nav { padding: 0.6rem 1.2rem; }
+    .hero { padding: 5rem 1.2rem 3rem; }
+    .first-lesson, .skills, .pricing, .how, .signup, .faq { padding: 3.5rem 1.2rem; }
+    footer { padding: 2rem 1.2rem; }
+    .ya-form-wrap { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">Дети-Нейросети</a>
+  <a class="nav-cta" href="#signup">ПЕРВОЕ ЗАНЯТИЕ БЕСПЛАТНО →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-blob hero-blob-1"></div>
+    <div class="hero-blob hero-blob-2"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-badge">● НАБОР ОТКРЫТ — ПЕРВОЕ ЗАНЯТИЕ БЕСПЛАТНО</div>
+    <h1 class="hero-title">
+      Ваш ребёнок<br>
+      освоит <em>ИИ</em><br>
+      раньше, чем<br>
+      <span class="acc">все остальные</span>
+    </h1>
+    <p class="hero-sub">
+      НейроКлуб — закрытое сообщество для детей от 10 лет, 
+      где они учатся создавать с помощью искусственного интеллекта. 
+      Не смотреть — а делать.
+    </p>
+    <div class="hero-actions">
+      <a href="#signup" class="btn-primary">ЗАПИСАТЬСЯ НА БЕСПЛАТНОЕ ЗАНЯТИЕ</a>
+      <a href="#how" class="btn-secondary">КАК ЭТО РАБОТАЕТ</a>
+    </div>
+    <div class="hero-trust">
+      <div class="hero-stat">
+        <strong>10+</strong>
+        <span>лет — возраст входа</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <strong>от 2×</strong>
+        <span>занятий в неделю</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <strong>1 690 ₽</strong>
+        <span>в месяц</span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <strong>7 дней</strong>
+        <span>бесплатно</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FIRST LESSON -->
+<section class="first-lesson">
+  <div class="first-lesson-inner">
+    <div>
+      <div class="section-label">ПЕРВОЕ ЗАНЯТИЕ</div>
+      <h2>На первом занятии ребёнок создаст своего <em>говорящего персонажа</em></h2>
+      <p>Никакого программирования. Никаких скучных лекций. Только творчество, магия ИИ — и видео, где твой герой говорит твоим голосом.</p>
+      <p>Этим видео захочется немедленно поделиться с друзьями. Именно так работает мотивация прийти на следующее занятие.</p>
+      <a href="#signup" class="btn-accent" style="display:inline-block; margin-top:0.5rem;">ЗАПИСАТЬСЯ БЕСПЛАТНО →</a>
+    </div>
+    <div class="lesson-result">
+      <div class="lesson-result-label">Что происходит на первом занятии</div>
+      <div class="lesson-steps">
+        <div class="lesson-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            Придумывает персонажа: имя, характер, суперсила, внешность
+            <div class="step-result">→ Учится формулировать идеи</div>
+          </div>
+        </div>
+        <div class="lesson-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            Составляем промпт вместе и генерируем картинку через ИИ
+            <div class="step-result">→ Понимает, как «говорить» с ИИ</div>
+          </div>
+        </div>
+        <div class="lesson-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            Загружаем картинку — ИИ оживляет персонажа
+            <div class="step-result">→ Герой начинает двигаться</div>
+          </div>
+        </div>
+        <div class="lesson-step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            Записывает свой голос — персонаж говорит его словами
+            <div class="step-result">→ Хочет показать всем друзьям!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="skills">
+  <div class="skills-inner">
+    <p class="section-label">ЧТО УМЕЮТ УЧАСТНИКИ НЕЙРОКЛУБА</p>
+    <h2>Вот лишь малая часть того, что умеют участники НейроКлуба</h2>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <span class="skill-icon">🌐</span>
+        <h3>Создаёт сайт за одно занятие</h3>
+        <p>От идеи до готового сайта в интернете — без единой строчки кода.</p>
+        <span class="skill-wow">Навык будущего</span>
+      </div>
+      <div class="skill-card">
+        <span class="skill-icon">🎮</span>
+        <h3>Разрабатывает свою игру</h3>
+        <p>Персонажи, уровни, механика — всё создаётся с помощью ИИ-инструментов.</p>
+        <span class="skill-wow">Вперёд сверстников</span>
+      </div>
+      <div class="skill-card">
+        <span class="skill-icon">🎨</span>
+        <h3>Делает графику уровня профи</h3>
+        <p>Арты, комиксы, иллюстрации, обложки — за минуты, с результатом которым хочется хвастаться.</p>
+        <span class="skill-wow">Творческий буст</span>
+      </div>
+      <div class="skill-card">
+        <span class="skill-icon">📹</span>
+        <h3>Снимает видео с анимацией и озвучкой</h3>
+        <p>Клипы, анимации, говорящие персонажи — как будто работала целая студия.</p>
+        <span class="skill-wow">Создатель, не зритель</span>
+      </div>
+      <div class="skill-card">
+        <span class="skill-icon">💰</span>
+        <h3>Изучает реальные способы заработка</h3>
+        <p>Подростки по всему миру уже зарабатывают на ИИ-навыках. Реальные примеры, реальные деньги.</p>
+        <span class="skill-wow">Монетизация</span>
+      </div>
+      <div class="skill-card">
+        <span class="skill-icon">✨</span>
+        <h3>И многое другое</h3>
+        <p>ИИ меняется каждый месяц — и мы всегда на передовой. Участники клуба первыми узнают о новых инструментах.</p>
+        <span class="skill-wow">Всегда в теме</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing">
+  <div class="pricing-inner">
+    <p class="section-label">СТОИМОСТЬ</p>
+    <h2>Прозрачные цены без сюрпризов</h2>
+    <div class="pricing-cards">
+      <div class="pricing-card">
+        <div class="pricing-label">ПРОБНЫЙ ПЕРИОД</div>
+        <div class="pricing-price">0 ₽</div>
+        <div class="pricing-per">первые 7 дней</div>
+        <ul class="pricing-features">
+          <li>Первое занятие — создание говорящего персонажа</li>
+          <li>Доступ к чату сообщества</li>
+          <li>Без привязки карты на старте</li>
+          <li>Отмена в любой момент</li>
+        </ul>
+        <a href="#signup" class="btn-outline-white">НАЧАТЬ БЕСПЛАТНО</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-label">ПОЛНЫЙ ДОСТУП</div>
+        <div class="pricing-price">1 690 ₽ <span>/ мес</span></div>
+        <div class="pricing-per">после пробного периода • отмена в любой момент</div>
+        <ul class="pricing-features">
+          <li>От 2 занятий в неделю в закрытом чате</li>
+          <li>Еженедельный живой эфир с разбором</li>
+          <li>Запись всех эфиров навсегда</li>
+          <li>Чат участников для обмена работами</li>
+          <li>Персональная реферальная ссылка</li>
+          <li>Закрытое сообщество ВКонтакте</li>
+        </ul>
+        <a href="#signup" class="btn-accent">ЗАПИСАТЬСЯ НА БЕСПЛАТНОЕ ЗАНЯТИЕ</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <p class="section-label">КАК ЭТО УСТРОЕНО</p>
+    <h2>Всё просто — даже для тех, кто никогда не слышал об ИИ</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-content">
+          <h3>Записываетесь на бесплатное первое занятие</h3>
+          <p>Оставляете имя и телефон. Никаких предоплат. Вам придёт ссылка в ВКонтакте — туда, где живёт сообщество.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-content">
+          <h3>Ребёнок проходит первое занятие</h3>
+          <p>Результат — видео, где его персонаж говорит его голосом. Этим хочется поделиться немедленно.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-content">
+          <h3>Вы решаете — остаться или нет</h3>
+          <p>Если нравится — оформляете подписку 1 690 ₽/месяц. Если нет — просто уходите. Без звонков и уговоров.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">04</div>
+        <div class="how-content">
+          <h3>От двух занятий в неделю + живой эфир</h3>
+          <p>Занятия — в закрытом чате ВКонтакте. Раз в неделю — живой эфир с разбором работ и ответами на вопросы. Всё записывается.</p>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">05</div>
+        <div class="how-content">
+          <h3>Ребёнок делится работами и получает бонусы</h3>
+          <p>У каждого участника — своя реферальная ссылка. Привёл друга — получил бонус. Это мотивирует оставаться и развиваться.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNUP FORM -->
+<section class="signup" id="signup">
+  <div class="signup-inner">
+    <div class="section-label" style="color:var(--accent)">ЗАПИСЬ НА БЕСПЛАТНОЕ ЗАНЯТИЕ</div>
+    <h2>Дайте ребёнку<br><em>фору в 5 лет</em></h2>
+    <p class="signup-sub">Первое занятие — бесплатно. Никаких обязательств. Просто попробуйте.</p>
+    <div class="ya-form-wrap">
+      <script src="https://forms.yandex.ru/_static/embed.js"></script>
+      <iframe src="https://forms.yandex.ru/u/6a26aa90e010db68dc3f25d5?iframe=1" frameborder="0" name="ya-form-6a26aa90e010db68dc3f25d5" width="650"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="faq-inner">
+    <p class="section-label">ВОПРОСЫ И ОТВЕТЫ</p>
+    <h2>Частые вопросы родителей</h2>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>С какого возраста можно записаться?</span>
+        <div class="faq-icon">+</div>
+      </button>
+      <div class="faq-a"><p>С 10 лет. Программа рассчитана на детей и подростков от 10 до 17 лет. Если ребёнок младше, но вы думаете, что он справится — напишите нам, разберёмся индивидуально.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>Нужен ли ребёнку компьютер или смартфон?</span>
+        <div class="faq-icon">+</div>
+      </button>
+      <div class="faq-a"><p>Заниматься можно и со смартфона — для просмотра занятий и общения в чате его вполне хватит. Но честно скажем: с компьютером или ноутбуком будет удобнее, нагляднее и результаты будут лучше. Если есть возможность — рекомендуем компьютер.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>Как проходят занятия?</span>
+        <div class="faq-icon">+</div>
+      </button>
+      <div class="faq-a"><p>От двух раз в неделю в закрытом чате ВКонтакте публикуются занятия — видео или текст с заданием. Раз в неделю — живой эфир с преподавателем, запись сохраняется. Ребёнок занимается в удобное время.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>Что если мы захотим отписаться?</span>
+        <div class="faq-icon">+</div>
+      </button>
+      <div class="faq-a"><p>Отмена подписки — в два клика в настройках ВКонтакте. Никаких звонков, никаких объяснений. Доступ сохраняется до конца оплаченного месяца.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>Насколько это безопасно для ребёнка?</span>
+        <div class="faq-icon">+</div>
+      </button>
+      <div class="faq-a"><p>Сообщество закрытое — только проверенные участники. В чатах есть модерация. Родители могут быть участниками и следить за общением. Никакого вредного контента — только обучение и работы участников.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span>Что даёт реферальная ссылка?</span>
+        <div class="faq-icon">+</div>
+      </button>
+      <div class="faq-a"><p>Каждый участник получает личную ссылку. Если по ней придёт новый платный участник — текущий получает бонус (бесплатные недели или эксклюзивный контент). Это способ сделать обучение ещё дешевле — или вовсе бесплатным.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">НейроКлуб</div>
+    <div class="footer-links">
+      <a href="privacy.html">Политика конфиденциальности</a>
+      <a href="terms.html">Пользовательское соглашение</a>
+      <a href="https://vk.com/club238114464" target="_blank">ВКонтакте</a>
+      <a href="mailto:ko4nevcorp@gmail.com">Написать нам</a>
+    </div>
+    <div class="footer-copy">
+      ИП Кочнев Евгений Васильевич · ИНН 010511249202 · ОГРНИП 326237500205771 · г. Краснодар, проезд Репина, 40 кв. 57 · ko4nevcorp@gmail.com
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+</script>
+</body>
+</html>
