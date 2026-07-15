@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Отлично! Выберите мессенджер — Клуб Дети-Нейросети</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0D0D0D;
+    --white: #FAFAF7;
+    --accent: #E8621A;
+    --accent2: #C94F0E;
+    --purple: #6B2FFA;
+    --gray: #F2F1EC;
+    --gray2: #E0DED7;
+    --text-muted: #7A7870;
+    --font-head: 'Unbounded', sans-serif;
+    --font-body: 'Onest', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--black);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* фоновые блобы как на главной */
+  .blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); opacity: 0.25; pointer-events: none;
+  }
+  .blob-1 {
+    width: 500px; height: 500px;
+    background: var(--accent);
+    top: -150px; right: -150px;
+    animation: float1 8s ease-in-out infinite;
+  }
+  .blob-2 {
+    width: 350px; height: 350px;
+    background: #C4B5FD;
+    bottom: -100px; left: -100px;
+    animation: float2 10s ease-in-out infinite;
+  }
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,20px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(15px,-15px)} }
+
+  .card {
+    position: relative; z-index: 1;
+    max-width: 520px; width: 100%;
+    text-align: center;
+  }
+
+  /* галочка */
+  .check-icon {
+    width: 72px; height: 72px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 2rem;
+    animation: popIn 0.5s ease both;
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .label {
+    font-family: var(--font-head);
+    font-size: 0.6rem; font-weight: 700;
+    letter-spacing: 0.12em; color: var(--accent);
+    margin-bottom: 1rem; text-transform: uppercase;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  h1 {
+    font-family: var(--font-head);
+    font-weight: 900;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.5s 0.15s ease both;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+
+  .subtitle {
+    color: #9CA3AF;
+    font-size: 1rem;
+    line-height: 1.65;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.5s 0.2s ease both;
+  }
+
+  .step-label {
+    font-family: var(--font-head);
+    font-size: 0.6rem; font-weight: 700;
+    letter-spacing: 0.1em; color: #555;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.5s 0.25s ease both;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeUp 0.5s 0.3s ease both;
+  }
+
+  .btn-messenger {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.5rem;
+    border-radius: 16px;
+    text-decoration: none;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+  }
+  .btn-messenger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  }
+
+  .btn-tg {
+    background: #229ED9;
+    color: var(--white);
+  }
+  .btn-tg:hover { background: #1a8bbf; }
+
+  .btn-max {
+    background: var(--white);
+    color: var(--black);
+    border-color: var(--gray2);
+  }
+  .btn-max:hover { background: var(--gray); }
+
+  .btn-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.5rem;
+  }
+  .btn-tg .btn-icon { background: rgba(255,255,255,0.2); }
+  .btn-max .btn-icon { background: var(--gray); }
+
+  .btn-text { text-align: left; }
+  .btn-title { display: block; font-size: 0.85rem; }
+  .btn-desc { display: block; font-size: 0.7rem; font-weight: 400; opacity: 0.75; margin-top: 2px; font-family: var(--font-body); }
+
+  .btn-arrow {
+    margin-left: auto;
+    font-size: 1.2rem;
+    opacity: 0.6;
+  }
+
+  .divider {
+    display: flex; align-items: center; gap: 1rem;
+    color: #555; font-size: 0.75rem;
+    margin: 0.5rem 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: #2A2A2A;
+  }
+
+  .footer-note {
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: #555;
+    line-height: 1.6;
+    animation: fadeUp 0.5s 0.35s ease both;
+  }
+  .footer-note a { color: var(--accent); text-decoration: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 480px) {
+    .btn-messenger { padding: 1rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="card">
+
+  <div class="check-icon">✓</div>
+
+  <div class="label">ЗАЯВКА ПРИНЯТА</div>
+
+  <h1>Отлично!<br>Выбери <em>мессенджер</em></h1>
+
+  <p class="subtitle">
+    Первый урок придёт тебе прямо в мессенджер.<br>
+    Выбери, куда удобнее получить ссылку:
+  </p>
+
+  <div class="step-label">ШАГ 2 ИЗ 2 — ВЫБЕРИ МЕССЕНДЖЕР</div>
+
+  <div class="buttons">
+
+    <a href="https://t.me/detineiro_bot" class="btn-messenger btn-tg" target="_blank">
+      <div class="btn-icon">✈️</div>
+      <div class="btn-text">
+        <span class="btn-title">Получить урок в Telegram</span>
+        <span class="btn-desc">Нажми «Начать» в боте — и урок у тебя</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+    <div class="divider">или</div>
+
+    <a href="https://max.ru/detineiro_bot" class="btn-messenger btn-max" target="_blank">
+      <div class="btn-icon">💬</div>
+      <div class="btn-text">
+        <span class="btn-title">Получить урок в MAX</span>
+        <span class="btn-desc">Для тех, у кого нет доступа к Telegram</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+  </div>
+
+  <p class="footer-note">
+    Нажав на кнопку, вы перейдёте в бота.<br>
+    Напишите ему «Начать» или нажмите кнопку Start — и получите первый урок.<br><br>
+    Есть вопросы? Напишите нам: <a href="mailto:ko4nevcorp@gmail.com">ko4nevcorp@gmail.com</a>
+  </p>
+
+</div>
+
+</body>
+</html>
