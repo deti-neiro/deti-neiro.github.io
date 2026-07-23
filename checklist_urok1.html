@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чек-лист урока 1 — Клуб Дети-Нейросети</title>
+<style>
+  :root {
+    --black: #0D0D0D;
+    --white: #FAFAF7;
+    --accent: #E8621A;
+    --accent2: #C94F0E;
+    --purple: #6B2FFA;
+    --gray: #F2F1EC;
+    --gray2: #E0DED7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--white);
+    color: var(--black);
+    padding: 0 0 4rem;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* ФИКСИРОВАННАЯ ШКАЛА ПРОГРЕССА */
+  .sticky-progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+    background: var(--black);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .sticky-steps {
+    display: flex;
+    gap: 0.3rem;
+    flex-shrink: 0;
+  }
+  .sticky-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #2A2A2A;
+    color: #555;
+    font-size: 0.65rem;
+    font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.3s, color 0.3s;
+    flex-shrink: 0;
+  }
+  .sticky-dot.done {
+    background: var(--accent);
+    color: white;
+  }
+  .sticky-dot.zero {
+    font-size: 0.55rem;
+  }
+  .sticky-bar-wrap {
+    flex: 1;
+    background: #2A2A2A;
+    border-radius: 50px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .sticky-bar-fill {
+    background: var(--accent);
+    height: 100%;
+    border-radius: 50px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+  .sticky-label {
+    font-size: 0.65rem;
+    color: #9CA3AF;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .sticky-label span {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ОТСТУП ПОД ФИКСИРОВАННУЮ ШКАЛУ */
+  .header { margin-top: 48px; }
+
+  .header {
+    background: var(--black);
+    color: white;
+    padding: 1.5rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  .header-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .header h1 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p { color: #9CA3AF; font-size: 0.85rem; line-height: 1.6; }
+
+  .step {
+    margin: 1.2rem 1rem 0;
+    background: white;
+    border-radius: 16px;
+    border: 2px solid var(--gray2);
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .step.done { border-color: var(--accent); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+  }
+
+  .step-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gray);
+    color: var(--black);
+    font-weight: 900;
+    font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+  .step.done .step-num { background: var(--accent); color: white; }
+  .step-num.zero { background: #1A1A1A; color: white; font-size: 0.7rem; }
+  .step.done .step-num.zero { background: var(--accent); }
+
+  .step-title { flex: 1; font-weight: 700; font-size: 0.95rem; line-height: 1.3; }
+
+  .step-body { padding: 0 1.2rem 1.2rem; border-top: 1px solid var(--gray2); }
+  .step-desc { font-size: 0.9rem; color: #444; line-height: 1.7; margin: 0.8rem 0; }
+
+  .prompt-box {
+    background: #1A1A1A;
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 0.8rem 0;
+  }
+  .prompt-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .prompt-text {
+    font-size: 0.85rem;
+    color: #D1D5DB;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 0.8rem;
+  }
+  .prompt-text mark {
+    background: rgba(232, 98, 26, 0.3);
+    color: #ff9966;
+    padding: 1px 3px;
+    border-radius: 3px;
+  }
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+  }
+  .copy-btn:hover { background: var(--accent2); }
+  .copy-btn.copied { background: #16a34a; }
+
+  .link-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    background: var(--gray);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--black);
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin: 0.6rem 0;
+    transition: background 0.2s;
+  }
+  .link-btn:hover { background: var(--gray2); }
+  .link-btn.primary { background: var(--black); color: white; }
+  .link-btn.primary:hover { background: #333; }
+  .link-icon { font-size: 1.1rem; }
+
+  .tip {
+    border-left: 3px solid var(--purple);
+    border-radius: 0 8px 8px 0;
+    padding: 0.7rem 1rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin: 0.6rem 0;
+    background: #EDE6FF;
+    color: #3b1fa0;
+  }
+  .tip.warn { background: #FFF3E0; border-left-color: #F59E0B; color: #92400e; }
+  .tip.success { background: #DCFCE7; border-left-color: #16a34a; color: #14532d; }
+
+  .done-btn {
+    width: 100%;
+    padding: 0.85rem;
+    margin-top: 1rem;
+    background: var(--black);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .done-btn:hover { background: #333; }
+  .step.done .done-btn { background: var(--accent); }
+
+  .input-group { margin: 0.6rem 0; }
+  .input-group label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.3rem;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 2px solid var(--gray2);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+
+  .steps-list {
+    background: var(--gray);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    font-size: 0.88rem;
+    line-height: 2;
+    color: #333;
+  }
+
+  .sep {
+    text-align: center;
+    font-size: 0.72rem;
+    color: #aaa;
+    margin: 0.8rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .sep::before, .sep::after { content:''; flex:1; height:1px; background: var(--gray2); }
+
+  .finish {
+    margin: 1.5rem 1rem 0;
+    background: var(--black);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: white;
+    display: none;
+  }
+  .finish.show { display: block; }
+  .finish-emoji { font-size: 3rem; margin-bottom: 1rem; }
+  .finish h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 0.6rem; }
+  .finish h2 span { color: var(--accent); }
+  .finish p { color: #9CA3AF; font-size: 0.9rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ФИКСИРОВАННАЯ ШКАЛА ПРОГРЕССА -->
+<div class="sticky-progress">
+  <div class="sticky-steps">
+    <div class="sticky-dot zero" id="dot0">0</div>
+    <div class="sticky-dot" id="dot1">1</div>
+    <div class="sticky-dot" id="dot2">2</div>
+    <div class="sticky-dot" id="dot3">3</div>
+    <div class="sticky-dot" id="dot4">4</div>
+  </div>
+  <div class="sticky-bar-wrap">
+    <div class="sticky-bar-fill" id="progressFill"></div>
+  </div>
+  <div class="sticky-label"><span id="progressText">0</span>/5</div>
+</div>
+
+<div class="header">
+  <div class="header-label">📋 Чек-лист · Урок 1</div>
+  <h1>Создай своего <span>говорящего персонажа</span> с помощью ИИ</h1>
+  <p>Выполняй шаги по порядку. Нажимай «Готово» после каждого шага.</p>
+</div>
+
+<!-- ШАГ 0 -->
+<div class="step" id="step0">
+  <div class="step-header">
+    <div class="step-num zero">0</div>
+    <div class="step-title">Проверь Google аккаунт</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Для работы с сервисами на этом уроке нужен Google аккаунт. Проверь, есть ли он у тебя:</p>
+    <a class="link-btn primary" href="https://myaccount.google.com" target="_blank">
+      <span class="link-icon">🔍</span>Проверить Google аккаунт
+    </a>
+    <div class="tip success">✅ Если открылась страница с твоей почтой — всё отлично! Жми «Готово».</div>
+    <div class="tip warn">⚠️ Если просит войти — авторизуйся. Нет почты вообще — создай новую через «Создать аккаунт», это бесплатно и займёт 2 минуты.</div>
+    <button class="done-btn" onclick="markDone(0)">✓ Готово, Google аккаунт есть!</button>
+  </div>
+</div>
+
+<!-- ШАГ 1 -->
+<div class="step" id="step1">
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <div class="step-title">Придумай своего персонажа</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Ответь на четыре вопроса — заполни поля ниже. На их основе автоматически составится промпт для ИИ.</p>
+    <div class="input-group">
+      <label>🦸 КТО ЭТО? (например: отважный рыцарь, робот из будущего, волшебница)</label>
+      <input type="text" id="who" placeholder="Напиши кто твой персонаж..." oninput="updatePrompt()">
+    </div>
+    <div class="input-group">
+      <label>👁 КАК ВЫГЛЯДИТ? (цвет волос, глаза, одежда, детали)</label>
+      <input type="text" id="look" placeholder="Опиши внешность..." oninput="updatePrompt()">
+    </div>
+    <div class="input-group">
+      <label>🎨 СТИЛЬ (например: аниме, cyberpunk, реалистичный, dark fantasy, glossy 3D)</label>
+      <input type="text" id="style" placeholder="Выбери стиль из методички..." oninput="updatePrompt()">
+    </div>
+    <div class="input-group">
+      <label>😊 ЭМОЦИЯ (например: уверенная улыбка, серьёзный взгляд, загадочность)</label>
+      <input type="text" id="emotion" placeholder="Какая эмоция у персонажа?" oninput="updatePrompt()">
+    </div>
+    <div class="input-group">
+      <label>🎨 ЦВЕТ ФОНА (например: белый, светло-серый, бежевый)</label>
+      <input type="text" id="bg" placeholder="Цвет фона..." oninput="updatePrompt()">
+    </div>
+    <div class="tip">💡 Чем точнее ты опишешь персонажа — тем лучше получится картинка!</div>
+    <button class="done-btn" onclick="markDone(1)">✓ Готово, персонаж придуман!</button>
+  </div>
+</div>
+
+<!-- ШАГ 2 -->
+<div class="step" id="step2">
+  <div class="step-header">
+    <div class="step-num">2</div>
+    <div class="step-title">Генерируем картинку в QwenChat</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Сначала скопируй промпт — он уже заполнен твоими ответами из шага 1. Потом открой QwenChat и вставь его туда.</p>
+    <div class="prompt-box">
+      <div class="prompt-label">📋 Твой промпт — сначала скопируй!</div>
+      <div class="prompt-text" id="promptText">Создай качественное изображение персонажа: <mark>[заполни шаг 1]</mark>. Стиль изображения: реалистичный. Персонаж смотрит строго прямо в камеру, ракурс анфас, без поворота головы в сторону. Голова полностью находится в кадре: не обрезай макушку, волосы, уши, подбородок и шею. Кадрирование: персонаж виден ниже груди, примерно до середины бедра. Лицо крупное и хорошо читается. Глаза, нос, рот, губы и подбородок должны быть чётко видны. Рот должен быть слегка приоткрыт, губы хорошо различимы и ничем не закрыты. Эмоция персонажа: <mark>[заполни шаг 1]</mark>. Внешность и детали: <mark>[заполни шаг 1]</mark>. Фон: однотонный, светлый, чистый, минималистичный. Цвет фона: <mark>[заполни шаг 1]</mark>. Освещение мягкое и ровное. Высокая детализация, чёткие контуры. Без текста, без надписей, без логотипов.</div>
+      <button class="copy-btn" id="copyBtn1" onclick="copyPrompt(this)">📋 Скопировать промпт</button>
+    </div>
+    <p class="step-desc">Теперь открывай QwenChat, войди через Google и вставь скопированный промпт:</p>
+    <a class="link-btn primary" href="https://chat.qwen.ai" target="_blank">
+      <span class="link-icon">🌐</span>Открыть QwenChat
+    </a>
+    <div class="steps-list">
+      1️⃣ Открой QwenChat по кнопке выше<br>
+      2️⃣ Войди через Google аккаунт<br>
+      3️⃣ Вставь скопированный промпт в поле чата<br>
+      4️⃣ Нажми отправить и жди 10–15 секунд<br>
+      5️⃣ Сохрани картинку на телефон или компьютер
+    </div>
+    <div class="tip warn">⚠️ Если QwenChat отказывается рисовать — переходи к запасному варианту ниже.</div>
+    <div class="sep">ЗАПАСНОЙ ВАРИАНТ</div>
+    <a class="link-btn" href="https://www.dreamfaceapp.com" target="_blank">
+      <span class="link-icon">🎨</span>Открыть DreamFace (генерация картинки здесь)
+    </a>
+    <p class="step-desc" style="font-size:0.82rem; color:#666;">В DreamFace тоже можно сгенерировать персонажа — используй тот же промпт.</p>
+    <button class="done-btn" onclick="markDone(2)">✓ Готово, картинка создана!</button>
+  </div>
+</div>
+
+<!-- ШАГ 3 -->
+<div class="step" id="step3">
+  <div class="step-header">
+    <div class="step-num">3</div>
+    <div class="step-title">Оживляем персонажа в DreamFace</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Теперь загружаем картинку в DreamFace и заставляем персонажа двигаться — через раздел AI Video!</p>
+
+    <a class="link-btn primary" href="https://www.dreamfaceapp.com" target="_blank">
+      <span class="link-icon">✨</span>Открыть DreamFace
+    </a>
+
+    <div class="steps-list">
+      1️⃣ Войди через Google аккаунт<br>
+      2️⃣ Найди и открой раздел <strong>AI Video</strong> (или «Видео с искусственным интеллектом»)<br>
+      3️⃣ Загрузи картинку персонажа из шага 2<br>
+      4️⃣ Скопируй промпт оживления ниже и вставь в поле для промпта<br>
+      5️⃣ Нажми кнопку генерации и жди 20–30 секунд<br>
+      6️⃣ Сохрани видео на устройство — персонаж двигается! 🎉
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-label">🎬 Промпт для оживления персонажа — скопируй и вставь</div>
+      <div class="prompt-text" id="animatePrompt">Оживи этого персонажа очень мягко и естественно. Голова едва заметно покачивается влево-вправо — движение минимальное, не более 5-10 градусов. Лёгкий кивок. Плечи и тело чуть двигаются в такт дыханию. Руки почти неподвижны, лёгкое движение. Лицо, рот и губы всегда строго в центре кадра, никогда не обрезаются и не выходят из поля зрения. Голова не поворачивается больше чем на чуть-чуть. Движения очень плавные и живые.</div>
+      <button class="copy-btn" id="copyBtn3" onclick="copyAnimate(this)">📋 Скопировать промпт оживления</button>
+    </div>
+
+    <div class="tip">💡 Убедись что после генерации рот персонажа хорошо виден — это важно для следующего шага с записью голоса!</div>
+
+    <button class="done-btn" onclick="markDone(3)">✓ Готово, персонаж двигается!</button>
+  </div>
+</div>
+
+<!-- ШАГ 4 — Запись голоса -->
+<div class="step" id="step4">
+  <div class="step-header">
+    <div class="step-num">4</div>
+    <div class="step-title">Записываем голос персонажа</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Теперь возвращаемся в DreamFace — добавляем голос к ожившему персонажу!</p>
+
+    <div class="steps-list">
+      1️⃣ В DreamFace найди свой сохранённый видеоперсонаж<br>
+      2️⃣ Нажми на <strong>иконку микрофона</strong><br>
+      3️⃣ Прочитай текст ниже от лица персонажа (10–20 секунд)<br>
+      4️⃣ Нажми кнопку генерации и жди результат<br>
+      5️⃣ Смотри — твой персонаж говорит твоим голосом! 🎉
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-label">🎤 Текст для записи голоса — прочитай вслух от лица персонажа</div>
+      <div class="prompt-text" id="voiceText">Привет! Я миньон Света и я люблю играть в роблокс, а не вот это вот всё. И если бы родители не заставляли меня учиться и смотреть про этот ваш искусственный интеллект, я бы сейчас очень классно играла бы очередную катку, лёжа на диване. Но так как я хочу развиваться, придётся учиться. Надеюсь, мне это очень понравится и в будущем очень пригодится.</div>
+      <button class="copy-btn" id="copyBtn4" onclick="copyVoice(this)">📋 Скопировать текст</button>
+    </div>
+
+    <div class="tip">💡 Говори уверенно и с выражением — в образе персонажа. Так видео получится живым и интересным!</div>
+
+    <button class="done-btn" onclick="markDone(4)">✓ Готово, персонаж говорит!</button>
+  </div>
+</div>
+
+<!-- ШАГ 5 — Скачай и поделись -->
+<div class="step" id="step5">
+  <div class="step-header">
+    <div class="step-num">5</div>
+    <div class="step-title">Скачай и поделись!</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Последний шаг — самый приятный. Скачай своё видео и покажи друзьям!</p>
+    <div class="steps-list">
+      1️⃣ Нажми кнопку <strong>Download</strong> или <strong>Скачать</strong> в DreamFace<br>
+      2️⃣ Видео сохранится в галерею или папку «Загрузки»<br>
+      3️⃣ Отправь другу в мессенджере 📲<br>
+      4️⃣ Поделись в чате клуба — получи реакции! 🎉
+    </div>
+    <div class="tip success">🎊 Ты только что создал говорящего персонажа с помощью ИИ. Это не магия — это навык. И ты только начал!</div>
+    <button class="done-btn" onclick="markDone(5)">🎉 Урок пройден!</button>
+  </div>
+</div>
+
+<!-- ФИНИШ -->
+<div class="finish" id="finish">
+  <div class="finish-emoji">🏆</div>
+  <h2>Поздравляем! Ты <span>крут!</span></h2>
+  <p>Ты создал говорящего персонажа с помощью ИИ. Это только начало — в клубе тебя ждёт ещё много крутых вещей.</p>
+  <br>
+  <p style="color: var(--accent); font-weight: 700;">Следующие занятия уже ждут тебя в боте 👇</p>
+</div>
+
+<script>
+  const TOTAL = 6; // 0..5
+  let done = new Set();
+
+  function markDone(n) {
+    done.add(n);
+    document.getElementById('step' + n).classList.add('done');
+    const dot = document.getElementById('dot' + n);
+    if (dot) dot.classList.add('done');
+    updateProgress();
+    if (done.size === TOTAL) {
+      document.getElementById('finish').classList.add('show');
+      setTimeout(() => {
+        document.getElementById('finish').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
+
+  function updateProgress() {
+    const pct = (done.size / TOTAL) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = done.size;
+  }
+
+  function getPromptText() {
+    const who = document.getElementById('who').value.trim() || '[КТО ЭТО — заполни шаг 1]';
+    const look = document.getElementById('look').value.trim() || '[ВНЕШНОСТЬ — заполни шаг 1]';
+    const style = document.getElementById('style').value.trim() || 'реалистичный';
+    const emotion = document.getElementById('emotion').value.trim() || '[ЭМОЦИЯ — заполни шаг 1]';
+    const bg = document.getElementById('bg').value.trim() || '[ЦВЕТ ФОНА — заполни шаг 1]';
+    return `Создай качественное изображение персонажа: ${who}. Стиль изображения: ${style}. Персонаж смотрит строго прямо в камеру, ракурс анфас, без поворота головы в сторону. Голова полностью находится в кадре: не обрезай макушку, волосы, уши, подбородок и шею. Кадрирование: от головы до чуть ниже пояса. Лицо хорошо читается, глаза, нос, рот и губы чётко видны. Рот слегка приоткрыт, губы хорошо различимы, ничем не закрыты. Эмоция персонажа: ${emotion}. Внешность и детали: ${look}. Фон: однотонный, светлый, чистый, минималистичный. Цвет фона: ${bg}. Освещение мягкое и ровное. Высокая детализация, чёткие контуры. Без текста, без надписей, без логотипов.`;
+  }
+
+  function updatePrompt() {
+    const who = document.getElementById('who').value.trim();
+    const look = document.getElementById('look').value.trim();
+    const style = document.getElementById('style').value.trim();
+    const emotion = document.getElementById('emotion').value.trim();
+    const bg = document.getElementById('bg').value.trim();
+
+    const fmt = (v, placeholder) => v ? `<mark>${v}</mark>` : `<mark>${placeholder}</mark>`;
+    const styleVal = style || 'реалистичный';
+
+    document.getElementById('promptText').innerHTML =
+      `Создай качественное изображение персонажа: ${fmt(who,'КТО ЭТО')}. Стиль изображения: <mark>${styleVal}</mark>. Персонаж смотрит строго прямо в камеру, ракурс анфас, без поворота головы в сторону. Голова полностью находится в кадре: не обрезай макушку, волосы, уши, подбородок и шею. Кадрирование: от головы до чуть ниже пояса. Лицо хорошо читается, глаза, нос, рот и губы чётко видны. Рот слегка приоткрыт, губы хорошо различимы, ничем не закрыты. Эмоция персонажа: ${fmt(emotion,'ЭМОЦИЯ')}. Внешность и детали: ${fmt(look,'ВНЕШНОСТЬ')}. Фон: однотонный, светлый, чистый, минималистичный. Цвет фона: ${fmt(bg,'ЦВЕТ ФОНА')}. Освещение мягкое и ровное. Высокая детализация, чёткие контуры. Без текста, без надписей, без логотипов.`;
+  }
+
+  function copyPrompt(btn) {
+    doCopy(getPromptText(), btn, '📋 Скопировать промпт');
+  }
+
+  function copyAnimate(btn) {
+    doCopy(document.getElementById('animatePrompt').textContent, btn, '📋 Скопировать промпт оживления');
+  }
+
+  function copyVoice(btn) {
+    doCopy(document.getElementById('voiceText').textContent, btn, '📋 Скопировать текст');
+  }
+
+  function doCopy(text, btn, original) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => showCopied(btn, original))
+        .catch(() => fallback(text, btn, original));
+    } else {
+      fallback(text, btn, original);
+    }
+  }
+
+  function showCopied(btn, original) {
+    btn.textContent = '✓ Скопировано!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 2500);
+  }
+
+  function fallback(text, btn, original) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(btn, original); }
+    catch(e) { alert('Зажми текст промпта пальцем и выбери «Копировать»'); }
+    document.body.removeChild(ta);
+  }
+</script>
+</body>
+</html>
