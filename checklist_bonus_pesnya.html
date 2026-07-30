@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Бонусный урок — Твоя песня через ИИ</title>
+<style>
+  :root {
+    --black: #0D0D0D;
+    --white: #FAFAF7;
+    --accent: #E8621A;
+    --accent2: #C94F0E;
+    --purple: #6B2FFA;
+    --gray: #F2F1EC;
+    --gray2: #E0DED7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--white);
+    color: var(--black);
+    padding: 0 0 4rem;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* ФИКСИРОВАННАЯ ШКАЛА */
+  .sticky-progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+    background: var(--black);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .sticky-steps { display: flex; gap: 0.3rem; flex-shrink: 0; }
+  .sticky-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #2A2A2A;
+    color: #555;
+    font-size: 0.7rem;
+    font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+  .sticky-dot.done { background: var(--accent); color: white; }
+  .sticky-bar-wrap {
+    flex: 1; background: #2A2A2A;
+    border-radius: 50px; height: 6px; overflow: hidden;
+  }
+  .sticky-bar-fill {
+    background: var(--accent); height: 100%;
+    border-radius: 50px; width: 0%;
+    transition: width 0.4s ease;
+  }
+  .sticky-label { font-size: 0.65rem; color: #9CA3AF; white-space: nowrap; flex-shrink: 0; }
+  .sticky-label span { color: var(--accent); font-weight: 700; }
+
+  .header { margin-top: 48px; background: var(--black); color: white; padding: 1.5rem; text-align: center; }
+  .header-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.8rem; }
+  .header h1 { font-size: 1.4rem; font-weight: 900; line-height: 1.2; margin-bottom: 0.5rem; }
+  .header h1 span { color: var(--accent); }
+  .header p { color: #9CA3AF; font-size: 0.85rem; line-height: 1.6; }
+
+  .step {
+    margin: 1.2rem 1rem 0;
+    background: white;
+    border-radius: 16px;
+    border: 2px solid var(--gray2);
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .step.done { border-color: var(--accent); }
+
+  .step-header { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--gray); color: var(--black);
+    font-weight: 900; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.3s, color 0.3s;
+  }
+  .step.done .step-num { background: var(--accent); color: white; }
+  .step-title { flex: 1; font-weight: 700; font-size: 0.95rem; line-height: 1.3; }
+
+  .step-body { padding: 0 1.2rem 1.2rem; border-top: 1px solid var(--gray2); }
+  .step-desc { font-size: 0.9rem; color: #444; line-height: 1.7; margin: 0.8rem 0; }
+
+  .input-group { margin: 0.6rem 0; }
+  .input-group label { display: block; font-size: 0.78rem; font-weight: 600; color: #555; margin-bottom: 0.3rem; }
+  .input-group input {
+    width: 100%; padding: 0.65rem 0.9rem;
+    border: 2px solid var(--gray2); border-radius: 8px;
+    font-size: 0.9rem; font-family: inherit; outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+
+  .prompt-box { background: #1A1A1A; border-radius: 12px; padding: 1rem; margin: 0.8rem 0; }
+  .prompt-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.6rem; }
+  .prompt-text { font-size: 0.85rem; color: #D1D5DB; line-height: 1.7; white-space: pre-wrap; word-break: break-word; margin-bottom: 0.8rem; }
+  .prompt-text mark { background: rgba(232,98,26,0.3); color: #ff9966; padding: 1px 3px; border-radius: 3px; }
+
+  .copy-btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    padding: 0.55rem 1rem; background: var(--accent); color: white;
+    border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s; width: 100%;
+  }
+  .copy-btn:hover { background: var(--accent2); }
+  .copy-btn.copied { background: #16a34a; }
+
+  .link-btn {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.8rem 1rem; background: var(--gray);
+    border-radius: 10px; text-decoration: none;
+    color: var(--black); font-weight: 700; font-size: 0.85rem;
+    margin: 0.6rem 0; transition: background 0.2s;
+  }
+  .link-btn:hover { background: var(--gray2); }
+  .link-btn.primary { background: var(--black); color: white; }
+  .link-btn.primary:hover { background: #333; }
+  .link-icon { font-size: 1.1rem; }
+
+  .steps-list {
+    background: var(--gray); border-radius: 12px;
+    padding: 1rem; margin: 0.5rem 0;
+    font-size: 0.88rem; line-height: 2; color: #333;
+  }
+
+  .tip { border-left: 3px solid var(--purple); border-radius: 0 8px 8px 0; padding: 0.7rem 1rem; font-size: 0.82rem; line-height: 1.6; margin: 0.6rem 0; background: #EDE6FF; color: #3b1fa0; }
+  .tip.warn { background: #FFF3E0; border-left-color: #F59E0B; color: #92400e; }
+  .tip.success { background: #DCFCE7; border-left-color: #16a34a; color: #14532d; }
+  .tip.fire { background: #1A1A1A; border-left-color: var(--accent); color: #D1D5DB; }
+
+  .done-btn {
+    width: 100%; padding: 0.85rem; margin-top: 1rem;
+    background: var(--black); color: white; border: none;
+    border-radius: 10px; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .done-btn:hover { background: #333; }
+  .step.done .done-btn { background: var(--accent); }
+
+  .finish {
+    margin: 1.5rem 1rem 0; background: var(--black);
+    border-radius: 16px; padding: 2rem 1.5rem;
+    text-align: center; color: white; display: none;
+  }
+  .finish.show { display: block; }
+  .finish-emoji { font-size: 3rem; margin-bottom: 1rem; }
+  .finish h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 0.6rem; }
+  .finish h2 span { color: var(--accent); }
+  .finish p { color: #9CA3AF; font-size: 0.9rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ПРОГРЕСС -->
+<div class="sticky-progress">
+  <div class="sticky-steps">
+    <div class="sticky-dot" id="dot1">1</div>
+    <div class="sticky-dot" id="dot2">2</div>
+    <div class="sticky-dot" id="dot3">3</div>
+    <div class="sticky-dot" id="dot4">4</div>
+  </div>
+  <div class="sticky-bar-wrap">
+    <div class="sticky-bar-fill" id="progressFill"></div>
+  </div>
+  <div class="sticky-label"><span id="progressText">0</span>/4</div>
+</div>
+
+<!-- ШАПКА -->
+<div class="header">
+  <div class="header-label">БОНУСНЫЙ УРОК</div>
+  <h1>Твой персонаж <span>поёт твою песню</span></h1>
+  <p>Генерируем текст, создаём трек через ИИ, обрезаем и накладываем на аватара. Поехали!</p>
+</div>
+
+<!-- ШАГ 1 — ТЕКСТ ПЕСНИ -->
+<div class="step" id="step1">
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <div class="step-title">Генерируем текст песни в QwenChat</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Заполни два поля — промпт соберётся автоматически. Потом скопируй его и вставь в QwenChat.</p>
+
+    <div class="input-group">
+      <label>🦸 ИМЯ ПЕРСОНАЖА (того, которого ты создал на первом уроке)</label>
+      <input type="text" id="hero" placeholder="Например: Годжо, Кибер-хакер, Тёмный рыцарь..." oninput="updateSongPrompt()">
+    </div>
+    <div class="input-group">
+      <label>👤 ТВОЁ ИМЯ</label>
+      <input type="text" id="myname" placeholder="Например: Миша, Света, Артём..." oninput="updateSongPrompt()">
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-label">📋 Промпт для QwenChat — скопируй и вставь!</div>
+      <div class="prompt-text" id="songPrompt">Напиши текст весёлой и энергичной песни на русском языке.
+
+Главные герои: персонаж по имени <mark>[введи имя персонажа]</mark> и его друг по имени <mark>[введи своё имя]</mark>.
+
+Сценарий: <mark>[ТВОЁ ИМЯ]</mark> не хотел заниматься ИИ — было лень, хотелось играть. Но <mark>[ИМЯ ПЕРСОНАЖА]</mark> убедил попробовать. Вместе они создали крутые вещи и теперь гордятся собой.
+
+Структура:
+— Куплет 1: <mark>[ТВОЁ ИМЯ]</mark> жалуется что не хочет учиться, хочет играть
+— Припев: <mark>[ИМЯ ПЕРСОНАЖА]</mark> зовёт в будущее, там всё круто
+— Куплет 2: они вместе пробуют ИИ и у них получается
+— Припев повтор
+— Финал: оба крутые, мир у их ног
+
+Требования: язык простой и молодёжный, рифмы естественные, 16-20 строк, без мата но с характером, оба имени упоминаются в каждом куплете.</div>
+      <button class="copy-btn" id="copySong" onclick="copySongPrompt(this)">📋 Скопировать промпт</button>
+    </div>
+
+    <a class="link-btn primary" href="https://chat.qwen.ai" target="_blank">
+      <span class="link-icon">🌐</span>Открыть QwenChat
+    </a>
+
+    <div class="steps-list">
+      1️⃣ Скопируй промпт выше<br>
+      2️⃣ Открой QwenChat и войди через Google аккаунт<br>
+      3️⃣ Вставь промпт и нажми отправить<br>
+      4️⃣ Получи текст песни и скопируй его — он понадобится на шаге 2
+    </div>
+
+    <div class="tip">💡 Если текст не понравился — попроси Qwen переделать: напиши "сделай более весёлым" или "добавь больше юмора". ИИ переделает за секунду!</div>
+
+    <button class="done-btn" onclick="markDone(1)">✓ Готово, текст песни есть!</button>
+  </div>
+</div>
+
+<!-- ШАГ 2 — СОЗДАЁМ ПЕСНЮ -->
+<div class="step" id="step2">
+  <div class="step-header">
+    <div class="step-num">2</div>
+    <div class="step-title">Создаём песню в Umnik.ai</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Umnik.ai — это ИИ который превращает твой текст в настоящую песню с голосом и музыкой. За регистрацию дают 40 кредитов — этого хватит!</p>
+
+    <a class="link-btn primary" href="https://umnik.ai" target="_blank">
+      <span class="link-icon">🎵</span>Открыть Umnik.ai
+    </a>
+
+    <div class="steps-list">
+      1️⃣ Зарегистрируйся через свою почту (Google авторизации нет)<br>
+      2️⃣ Подтверди почту — придёт письмо, нажми на ссылку<br>
+      3️⃣ Войди в аккаунт — у тебя будет 4 кредита на старте<br>
+      4️⃣ Нажми <strong>«Все нейросети»</strong> вверху<br>
+      5️⃣ Выбери вкладку <strong>«Аудио»</strong><br>
+      6️⃣ Выбери инструмент <strong>Mureka 9</strong><br>
+      7️⃣ Дальше смотри видео-инструкцию к этому уроку!
+    </div>
+
+    <div class="tip warn">⚠️ Если первый вариант не понравился — попробуй ещё раз с другим жанром. У тебя 40 кредитов, не бойся экспериментировать!</div>
+
+    <div class="tip fire">🔥 Совет по жанру: для энергичного персонажа выбирай поп или рэп. Для тёмного мага или рыцаря — рок или эпик. Для аниме-персонажа — J-pop или аниме стиль.</div>
+
+    <button class="done-btn" onclick="markDone(2)">✓ Готово, песня скачана!</button>
+  </div>
+</div>
+
+<!-- ШАГ 3 — ОБРЕЗКА -->
+<div class="step" id="step3">
+  <div class="step-header">
+    <div class="step-num">3</div>
+    <div class="step-title">Обрезаем песню до 30 секунд</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">DreamFace принимает аудио только до 30 секунд. Выбери самый крутой кусок песни — обычно это припев!</p>
+
+    <a class="link-btn primary" href="https://mp3cut.net/ru/" target="_blank">
+      <span class="link-icon">✂️</span>Открыть MP3Cut
+    </a>
+
+    <div class="steps-list">
+      1️⃣ Нажми <strong>«Открыть файл»</strong> и загрузи скачанную песню<br>
+      2️⃣ На экране появится звуковая дорожка<br>
+      3️⃣ Перетащи ползунки — выдели 30 секунд самого крутого куска<br>
+      4️⃣ Нажми кнопку <strong>воспроизведения</strong> — проверь как звучит<br>
+      5️⃣ Нажми <strong>«Сохранить»</strong> и скачай обрезанный MP3
+    </div>
+
+    <div class="tip">💡 Лучше всего брать припев — это самая энергичная и запоминающаяся часть. Именно её будет петь твой персонаж!</div>
+
+    <button class="done-btn" onclick="markDone(3)">✓ Готово, фрагмент 30 сек сохранён!</button>
+  </div>
+</div>
+
+<!-- ШАГ 4 — НАКЛАДЫВАЕМ НА АВАТАРА -->
+<div class="step" id="step4">
+  <div class="step-header">
+    <div class="step-num">4</div>
+    <div class="step-title">Персонаж поёт твою песню в DreamFace</div>
+  </div>
+  <div class="step-body">
+    <p class="step-desc">Последний шаг — самый крутой. Накладываем песню на персонажа или на самого себя!</p>
+
+    <a class="link-btn primary" href="https://www.dreamfaceapp.com" target="_blank">
+      <span class="link-icon">✨</span>Открыть DreamFace
+    </a>
+
+    <div class="steps-list">
+      1️⃣ Открой раздел <strong>Avatar AI</strong><br>
+      2️⃣ Выбери своего персонажа из первого урока — или запиши короткое видео себя (5-10 сек, видно лицо и губы)<br>
+      3️⃣ Нажми кнопку <strong>«Want avatar to say»</strong><br>
+      4️⃣ Выбери вкладку <strong>Audio</strong><br>
+      5️⃣ Нажми <strong>«Upload audio or video»</strong><br>
+      6️⃣ Загрузи обрезанный MP3 из шага 3<br>
+      7️⃣ Жди около минуты<br>
+      8️⃣ Готово — твой персонаж поёт твою песню! 🎤
+    </div>
+
+    <div class="tip success">🎊 Скачай видео и отправь друзьям — пусть завидуют! Это сделал ИИ, и ты теперь умеешь управлять этим инструментом.</div>
+
+    <div class="tip warn">⚠️ Важно: при записи видео себя — смотри прямо в камеру, рот должен быть виден, можно немного говорить или петь вслух. Губы двигаются — результат будет лучше!</div>
+
+    <button class="done-btn" onclick="markDone(4)">🎤 Готово, персонаж поёт!</button>
+  </div>
+</div>
+
+<!-- ФИНИШ -->
+<div class="finish" id="finish">
+  <div class="finish-emoji">🏆</div>
+  <h2>Ты только что сделал <span>невозможное!</span></h2>
+  <p>Написал текст песни, создал трек через ИИ, обрезал его и заставил персонажа петь. Это умеют единицы — а ты уже умеешь.</p>
+  <br>
+  <p style="color: var(--accent); font-weight: 700; font-size: 1rem;">Покажи видео друзьям — пусть тоже попробуют сделать своё! 😎</p>
+</div>
+
+<script>
+  const TOTAL = 4;
+  let done = new Set();
+
+  function markDone(n) {
+    done.add(n);
+    document.getElementById('step' + n).classList.add('done');
+    const dot = document.getElementById('dot' + n);
+    if (dot) dot.classList.add('done');
+    updateProgress();
+    if (done.size === TOTAL) {
+      document.getElementById('finish').classList.add('show');
+      setTimeout(() => {
+        document.getElementById('finish').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
+
+  function updateProgress() {
+    const pct = (done.size / TOTAL) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = done.size;
+  }
+
+  function updateSongPrompt() {
+    const hero = document.getElementById('hero').value.trim();
+    const myname = document.getElementById('myname').value.trim();
+
+    const h = hero ? `<mark>${hero}</mark>` : '<mark>[введи имя персонажа]</mark>';
+    const n = myname ? `<mark>${myname}</mark>` : '<mark>[введи своё имя]</mark>';
+
+    document.getElementById('songPrompt').innerHTML =
+`Напиши текст весёлой и энергичной песни на русском языке.
+
+Главные герои: персонаж по имени ${h} и его друг по имени ${n}.
+
+Сценарий: ${n} не хотел заниматься ИИ — было лень, хотелось играть. Но ${h} убедил попробовать. Вместе они создали крутые вещи и теперь гордятся собой.
+
+Структура:
+— Куплет 1: ${n} жалуется что не хочет учиться, хочет играть
+— Припев: ${h} зовёт в будущее, там всё круто
+— Куплет 2: они вместе пробуют ИИ и у них получается
+— Припев повтор
+— Финал: оба крутые, мир у их ног
+
+Требования: язык простой и молодёжный, рифмы естественные, 16-20 строк, без мата но с характером, оба имени упоминаются в каждом куплете.`;
+  }
+
+  function getSongPromptText() {
+    const hero = document.getElementById('hero').value.trim() || '[имя персонажа]';
+    const myname = document.getElementById('myname').value.trim() || '[твоё имя]';
+    return `Напиши текст весёлой и энергичной песни на русском языке.\n\nГлавные герои: персонаж по имени ${hero} и его друг по имени ${myname}.\n\nСценарий: ${myname} не хотел заниматься ИИ — было лень, хотелось играть. Но ${hero} убедил попробовать. Вместе они создали крутые вещи и теперь гордятся собой.\n\nСтруктура:\n— Куплет 1: ${myname} жалуется что не хочет учиться, хочет играть\n— Припев: ${hero} зовёт в будущее, там всё круто\n— Куплет 2: они вместе пробуют ИИ и у них получается\n— Припев повтор\n— Финал: оба крутые, мир у их ног\n\nТребования: язык простой и молодёжный, рифмы естественные, 16-20 строк, без мата но с характером, оба имени упоминаются в каждом куплете.`;
+  }
+
+  function copySongPrompt(btn) {
+    doCopy(getSongPromptText(), btn, '📋 Скопировать промпт');
+  }
+
+  function doCopy(text, btn, original) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => showCopied(btn, original))
+        .catch(() => fallback(text, btn, original));
+    } else {
+      fallback(text, btn, original);
+    }
+  }
+
+  function showCopied(btn, original) {
+    btn.textContent = '✓ Скопировано!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 2500);
+  }
+
+  function fallback(text, btn, original) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(btn, original); }
+    catch(e) { alert('Зажми текст промпта пальцем и выбери «Копировать»'); }
+    document.body.removeChild(ta);
+  }
+</script>
+</body>
+</html>
